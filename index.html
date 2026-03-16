@@ -2,117 +2,185 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Simulations — Champ Magnétique</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#1a1a2e;--bg2:#16213e;--bg3:#0f3460;
+  --bg:#0e0e1a;--bg2:#13132a;--bg3:#1a1a3a;
   --green:#00e676;--blue:#40c4ff;--red:#ff5252;--amber:#ffca28;
-  --text:#e8eaf6;--muted:rgba(232,234,246,.5);
-  --border:rgba(255,255,255,.1);
+  --text:#e8eaf6;--muted:rgba(232,234,246,.45);
+  --border:rgba(255,255,255,.08);--border2:rgba(0,230,118,.2);
+  --radius:10px;
 }
-html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+html,body{width:100%;height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
 
 /* ===== TABS ===== */
-#tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 8px;position:sticky;top:0;z-index:50;overflow-x:auto}
+#tabs{
+  display:flex;background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  padding:0 12px;position:sticky;top:0;z-index:50;
+  overflow-x:auto;gap:2px;
+}
 #tabs::-webkit-scrollbar{height:0}
-.tab{padding:14px 16px;font-size:13px;font-weight:600;letter-spacing:.5px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tab{
+  padding:13px 18px;font-size:12px;font-weight:600;
+  letter-spacing:.5px;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .18s;
+  white-space:nowrap;user-select:none;border-radius:var(--radius) var(--radius) 0 0;
+}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.tab.active{color:var(--green);border-bottom-color:var(--green);background:rgba(0,230,118,.04)}
 
 /* ===== SIM CONTAINERS ===== */
-.sim{display:none;flex-direction:column;height:calc(100vh - 49px)}
+.sim{display:none;flex-direction:column;height:calc(100vh - 47px)}
 .sim.active{display:flex}
-
-/* split: canvas left, controls right */
-.sim-body{flex:1;display:flex;overflow:hidden}
-.canvas-wrap{flex:1;position:relative;background:#000;overflow:hidden;cursor:crosshair}
+.sim-body{flex:1;display:flex;overflow:hidden;min-height:0}
+.canvas-wrap{flex:1;position:relative;background:#000;overflow:hidden;cursor:crosshair;touch-action:none}
 .canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%}
-.panel{width:260px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto;padding:16px}
 
-/* panel widgets */
-.p-section{margin-bottom:18px}
-.p-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:10px}
-.p-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.p-row label{font-size:12px;color:var(--muted);min-width:80px}
-input[type=range]{flex:1;accent-color:var(--green);height:3px;cursor:pointer}
-.p-val{font-size:12px;font-family:monospace;color:var(--green);min-width:42px;text-align:right}
+/* ===== PANEL ===== */
+.panel{
+  width:252px;flex-shrink:0;background:var(--bg2);
+  border-left:1px solid var(--border);overflow-y:auto;padding:14px 12px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
-.btn{width:100%;padding:9px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-bottom:6px;text-transform:uppercase}
-.btn:hover{background:rgba(0,230,118,.12);border-color:var(--green);color:var(--green)}
-.btn.primary{background:rgba(0,230,118,.15);border-color:var(--green);color:var(--green)}
+.p-section{margin-bottom:16px}
+.p-title{
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--green);margin-bottom:8px;opacity:.8;
+}
+.p-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.p-row label{font-size:11px;color:var(--muted);min-width:72px}
+input[type=range]{
+  flex:1;accent-color:var(--green);height:3px;cursor:pointer;
+  border-radius:2px;
+}
+.p-val{font-size:11px;font-family:monospace;color:var(--green);min-width:38px;text-align:right}
 
-.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .2s}
-.chip.on{background:rgba(0,230,118,.12);border-color:var(--green);color:var(--green)}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+/* Buttons */
+.btn{
+  width:100%;padding:8px 10px;border-radius:var(--radius);
+  border:1px solid var(--border);background:rgba(255,255,255,.03);
+  color:var(--text);font-size:11px;font-weight:600;
+  letter-spacing:.5px;cursor:pointer;transition:all .15s;
+  margin-bottom:5px;text-transform:uppercase;
+}
+.btn:hover{background:rgba(0,230,118,.1);border-color:var(--border2);color:var(--green)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:rgba(0,230,118,.12);border-color:var(--border2);color:var(--green)}
 
-.legend-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;color:var(--muted)}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* Chips */
+.chip{
+  display:inline-flex;align-items:center;padding:4px 10px;
+  border-radius:20px;font-size:10px;cursor:pointer;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);transition:all .15s;user-select:none;
+}
+.chip:hover{border-color:rgba(255,255,255,.2);color:var(--text)}
+.chip.on{background:rgba(0,230,118,.1);border-color:var(--border2);color:var(--green)}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
 
-.readout{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px}
-.readout-label{font-size:10px;color:var(--muted);margin-bottom:2px}
-.readout-val{font-size:18px;font-weight:700;font-family:monospace;color:var(--green)}
-.readout-unit{font-size:11px;color:var(--muted)}
+/* Readouts */
+.readout{
+  background:rgba(0,0,0,.25);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 10px;margin-bottom:7px;
+  transition:border-color .2s;
+}
+.readout:hover{border-color:var(--border2)}
+.readout-label{font-size:9px;color:var(--muted);margin-bottom:2px;letter-spacing:.5px;text-transform:uppercase}
+.readout-val{font-size:17px;font-weight:700;font-family:monospace;color:var(--green);line-height:1}
+.readout-unit{font-size:10px;color:var(--muted)}
 
-.status-bar{height:32px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:0 16px;font-size:11px;color:var(--muted);overflow:hidden}
-.status-bar span{color:var(--text)}
+/* Legend */
+.legend-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:11px;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Status bar */
+.sbar{
+  height:28px;background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 14px;
+  font-size:10px;color:var(--muted);gap:16px;overflow:hidden;
+  letter-spacing:.3px;
+}
+.sbar span{color:var(--text)}
+
+/* FPS counter */
+#fps{
+  position:fixed;top:52px;right:8px;z-index:99;
+  font-size:9px;font-family:monospace;
+  color:rgba(0,230,118,.4);pointer-events:none;
+  letter-spacing:1px;
+}
+
+/* Panel toggle button (mobile) */
+#panel-toggle{
+  display:none;position:absolute;bottom:36px;right:8px;z-index:40;
+  width:36px;height:36px;border-radius:50%;
+  background:var(--bg2);border:1px solid var(--border2);
+  color:var(--green);font-size:16px;cursor:pointer;
+  align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.4);transition:all .2s;
+}
+#panel-toggle:hover{background:rgba(0,230,118,.12)}
 
 /* ===== MOBILE ===== */
 @media(max-width:768px){
-  .tab{padding:12px 12px;font-size:11px}
+  body{overflow:hidden}
+  .tab{padding:11px 10px;font-size:10px;letter-spacing:.3px}
   .sim{height:100vh}
   .sim-body{flex-direction:column}
-  .canvas-wrap{flex:none;height:55vh}
-  .panel{
-    width:100%;height:auto;max-height:45vh;
-    border-left:none;border-top:1px solid var(--border);
-    overflow-y:auto;padding:10px 12px;
-    display:flex;flex-wrap:wrap;gap:0 16px;
-  }
-  .p-section{width:calc(50% - 8px);min-width:140px;margin-bottom:12px}
-  .readout{padding:7px 10px}
-  .readout-val{font-size:15px}
-  .btn{padding:8px;font-size:11px}
-  .status-bar{display:none}
-  input[type=range]{height:6px}
-  .chip{padding:6px 12px;font-size:12px}
-}
+  .canvas-wrap{flex:1;height:0}
 
-@media(max-width:480px){
-  .p-section{width:100%}
-  .canvas-wrap{height:50vh}
-  .panel{max-height:50vh}
-  .tab{padding:10px 8px;font-size:10px}
+  .panel{
+    width:100%;max-height:46vh;flex-shrink:0;
+    border-left:none;border-top:1px solid var(--border);
+    padding:10px 12px;overflow-y:auto;
+    display:grid;grid-template-columns:1fr 1fr;gap:0 14px;
+  }
+  .panel.collapsed{max-height:0;padding:0;overflow:hidden;border:none}
+
+  .p-section{margin-bottom:10px}
+  .readout-val{font-size:14px}
+  .btn{padding:7px;font-size:10px}
+  .sbar{display:none}
+  input[type=range]{height:5px}
+  .chip{padding:5px 10px;font-size:11px}
+  #panel-toggle{display:flex}
+  #fps{display:none}
+}
+@media(max-width:420px){
+  .panel{grid-template-columns:1fr}
+  .tab{padding:10px 7px;font-size:9px}
 }
 </style>
 </head>
 <body>
+<div id="fps">-- FPS</div>
 
 <!-- TABS -->
 <div id="tabs">
   <div class="tab active" onclick="showSim(0)">🧲 Aimant &amp; Boussoles</div>
-  <div class="tab" onclick="showSim(1)">⚡ Fil &amp; Boussole (Œrsted)</div>
+  <div class="tab" onclick="showSim(1)">⚡ Œrsted</div>
   <div class="tab" onclick="showSim(2)">🔵 Lignes de champ</div>
-  <div class="tab" onclick="showSim(3)">🔄 Champ uniforme (aimant U)</div>
+  <div class="tab" onclick="showSim(3)">🔄 Champ uniforme</div>
 </div>
 
-<!-- ===================================================== -->
-<!-- SIM 0 : AIMANT BARREAU + BOUSSOLES                    -->
-<!-- ===================================================== -->
+<!-- SIM 0 -->
 <div class="sim active" id="sim0">
   <div class="sim-body">
-    <div class="canvas-wrap" id="wrap0">
-      <canvas id="c0"></canvas>
-    </div>
-    <div class="panel">
+    <div class="canvas-wrap" id="wrap0"><canvas id="c0"></canvas></div>
+    <div class="panel" id="panel0">
       <div class="p-section">
         <div class="p-title">Aimant</div>
         <div class="p-row"><label>Intensité</label>
           <input type="range" id="s0-str" min=".5" max="3" step=".05" value="1.5">
-          <span class="ctrl-val p-val" id="s0-str-v">1.5</span>
+          <span class="p-val" id="s0-str-v">1.5</span>
         </div>
-        <button class="btn" onclick="s0.flip()">↔ Inverser les pôles</button>
+        <button class="btn" onclick="s0.flip()">↔ Inverser pôles</button>
         <button class="btn primary" onclick="s0.reset()">↺ Réinitialiser</button>
       </div>
       <div class="p-section">
@@ -125,16 +193,11 @@ input[type=range]{flex:1;accent-color:var(--green);height:3px;cursor:pointer}
         </div>
       </div>
       <div class="p-section">
-        <div class="p-title">Mesure en P</div>
-        <div class="readout">
-          <div class="readout-label">|B| au curseur</div>
-          <div><span class="readout-val" id="s0-bmag">0.00</span>
-               <span class="readout-unit"> mT</span></div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Angle θ</div>
-          <div><span class="readout-val" id="s0-bang">0°</span></div>
-        </div>
+        <div class="p-title">Mesure</div>
+        <div class="readout"><div class="readout-label">|B| curseur</div>
+          <div><span class="readout-val" id="s0-bmag">0.00</span><span class="readout-unit"> mT</span></div></div>
+        <div class="readout"><div class="readout-label">Angle θ</div>
+          <div><span class="readout-val" id="s0-bang">0°</span></div></div>
       </div>
       <div class="p-section">
         <div class="p-title">Légende</div>
@@ -144,27 +207,22 @@ input[type=range]{flex:1;accent-color:var(--green);height:3px;cursor:pointer}
       </div>
     </div>
   </div>
-  <div class="status-bar">
-    Déplace l'aimant avec la souris · <span id="s0-pos">x=0, y=0</span> · Clique pour poser une boussole fixe
-  </div>
+  <div class="sbar">Drag l'aimant · Clic = boussole fixe · <span id="s0-pos">x=0, y=0</span></div>
+  <button id="panel-toggle" onclick="togglePanel('panel0',this)" title="Contrôles">⚙</button>
 </div>
 
-<!-- ===================================================== -->
-<!-- SIM 1 : FIL RECTILIGNE (OERSTED)                      -->
-<!-- ===================================================== -->
+<!-- SIM 1 -->
 <div class="sim" id="sim1">
   <div class="sim-body">
-    <div class="canvas-wrap" id="wrap1">
-      <canvas id="c1"></canvas>
-    </div>
-    <div class="panel">
+    <div class="canvas-wrap" id="wrap1"><canvas id="c1"></canvas></div>
+    <div class="panel" id="panel1">
       <div class="p-section">
         <div class="p-title">Courant</div>
         <div class="p-row"><label>Intensité I</label>
           <input type="range" id="s1-I" min="0" max="10" step=".1" value="5">
           <span class="p-val" id="s1-I-v">5.0 A</span>
         </div>
-        <div class="chips" style="margin-top:8px">
+        <div class="chips" style="margin-top:6px">
           <div class="chip on" id="s1-dir" onclick="s1.toggleDir(this)">↑ Sens +</div>
         </div>
         <button class="btn" onclick="s1.toggleDir(document.getElementById('s1-dir'))">Inverser sens</button>
@@ -173,46 +231,34 @@ input[type=range]{flex:1;accent-color:var(--green);height:3px;cursor:pointer}
         <div class="p-title">Affichage</div>
         <div class="chips">
           <div class="chip on" id="s1-needles" onclick="s1.toggle('needles',this)">Boussoles</div>
-          <div class="chip on" id="s1-circles" onclick="s1.toggle('circles',this)">Lignes circulaires</div>
+          <div class="chip on" id="s1-circles" onclick="s1.toggle('circles',this)">Lignes circ.</div>
           <div class="chip on" id="s1-vecs" onclick="s1.toggle('vecs',this)">Vecteurs B</div>
         </div>
       </div>
       <div class="p-section">
         <div class="p-title">Mesure</div>
-        <div class="readout">
-          <div class="readout-label">|B| à distance r</div>
-          <div><span class="readout-val" id="s1-bmag">0.00</span>
-               <span class="readout-unit"> μT</span></div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Distance r</div>
-          <div><span class="readout-val" id="s1-r">0</span>
-               <span class="readout-unit"> cm</span></div>
-        </div>
+        <div class="readout"><div class="readout-label">|B| à distance r</div>
+          <div><span class="readout-val" id="s1-bmag">0.00</span><span class="readout-unit"> μT</span></div></div>
+        <div class="readout"><div class="readout-label">Distance r</div>
+          <div><span class="readout-val" id="s1-r">0</span><span class="readout-unit"> cm</span></div></div>
       </div>
       <div class="p-section">
         <div class="p-title">Formule</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.8;font-family:monospace">
-          B = μ₀·I / (2π·r)<br>
-          μ₀ = 4π×10⁻⁷ T·m/A
+        <div style="font-size:11px;color:var(--muted);line-height:1.9;font-family:monospace">
+          B = μ₀·I / (2π·r)<br>μ₀ = 4π×10⁻⁷ T·m/A
         </div>
       </div>
     </div>
   </div>
-  <div class="status-bar">
-    Expérience d'Œrsted (1820) · Fil parcourant un courant crée un champ circulaire · <span id="s1-pos">r=0 cm</span>
-  </div>
+  <div class="sbar">Expérience d'Œrsted (1820) · <span id="s1-pos">r=0 cm</span></div>
+  <button id="panel-toggle" onclick="togglePanel('panel1',this)" title="Contrôles">⚙</button>
 </div>
 
-<!-- ===================================================== -->
-<!-- SIM 2 : LIGNES DE CHAMP (tracé par intégration)       -->
-<!-- ===================================================== -->
+<!-- SIM 2 -->
 <div class="sim" id="sim2">
   <div class="sim-body">
-    <div class="canvas-wrap" id="wrap2">
-      <canvas id="c2"></canvas>
-    </div>
-    <div class="panel">
+    <div class="canvas-wrap" id="wrap2"><canvas id="c2"></canvas></div>
+    <div class="panel" id="panel2">
       <div class="p-section">
         <div class="p-title">Sources</div>
         <button class="btn primary" onclick="s2.addNorth()">+ Pôle Nord</button>
@@ -238,25 +284,20 @@ input[type=range]{flex:1;accent-color:var(--green);height:3px;cursor:pointer}
           <div class="chip" id="s2-mag" onclick="s2.toggle('mag',this)">Intensité</div>
         </div>
       </div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-top:8px">
-        Glisse les pôles · Les lignes sont tracées par intégration numérique de Runge-Kutta
+      <div style="font-size:10px;color:var(--muted);line-height:1.7">
+        Drag les pôles · Intégration Runge-Kutta 4
       </div>
     </div>
   </div>
-  <div class="status-bar">
-    Drag pour déplacer les pôles · <span id="s2-info">2 pôles actifs</span>
-  </div>
+  <div class="sbar">Drag les pôles · <span id="s2-info">2 pôles actifs</span></div>
+  <button id="panel-toggle" onclick="togglePanel('panel2',this)" title="Contrôles">⚙</button>
 </div>
 
-<!-- ===================================================== -->
-<!-- SIM 3 : CHAMP UNIFORME — AIMANT EN U                  -->
-<!-- ===================================================== -->
+<!-- SIM 3 -->
 <div class="sim" id="sim3">
   <div class="sim-body">
-    <div class="canvas-wrap" id="wrap3">
-      <canvas id="c3"></canvas>
-    </div>
-    <div class="panel">
+    <div class="canvas-wrap" id="wrap3"><canvas id="c3"></canvas></div>
+    <div class="panel" id="panel3">
       <div class="p-section">
         <div class="p-title">Aimant en U</div>
         <div class="p-row"><label>Écartement</label>
@@ -278,550 +319,428 @@ input[type=range]{flex:1;accent-color:var(--green);height:3px;cursor:pointer}
         </div>
       </div>
       <div class="p-section">
-        <div class="p-title">Mesure dans l'entrefer</div>
-        <div class="readout">
-          <div class="readout-label">|B| centre entrefer</div>
-          <div><span class="readout-val" id="s3-b">0.00</span>
-               <span class="readout-unit"> mT</span></div>
-        </div>
-        <div class="readout">
-          <div class="readout-label">Uniformité</div>
-          <div><span class="readout-val" id="s3-uni">100</span>
-               <span class="readout-unit"> %</span></div>
-        </div>
+        <div class="p-title">Mesure</div>
+        <div class="readout"><div class="readout-label">|B| sonde</div>
+          <div><span class="readout-val" id="s3-b">0.00</span><span class="readout-unit"> mT</span></div></div>
+        <div class="readout"><div class="readout-label">Uniformité</div>
+          <div><span class="readout-val" id="s3-uni">100</span><span class="readout-unit"> %</span></div></div>
       </div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.7">
-        Entre les pôles : champ <strong style="color:var(--text)">uniforme</strong> (lignes parallèles)<br>
-        À l'extérieur : champ non uniforme
+      <div style="font-size:10px;color:var(--muted);line-height:1.7">
+        Entre les pôles : champ <strong style="color:var(--text)">uniforme</strong><br>À l'extérieur : non uniforme
       </div>
     </div>
   </div>
-  <div class="status-bar">
-    Déplace la sonde dans l'entrefer · <span id="s3-pos">B = 0 mT</span>
-  </div>
+  <div class="sbar">Déplace la sonde · <span id="s3-pos">B = 0 mT</span></div>
+  <button id="panel-toggle" onclick="togglePanel('panel3',this)" title="Contrôles">⚙</button>
 </div>
 
 <script>
+'use strict';
+
 // ================================================================
-//  UTILITIES
+//  PERFORMANCE: FPS counter + visibility API
 // ================================================================
-function dipoleB(px,py, sx,sy, charge){
-  const dx=px-sx, dy=py-sy;
-  const r=Math.sqrt(dx*dx+dy*dy)+.001;
-  const f=charge/(r*r*r);
-  return {bx:dx*f, by:dy*f};
+let _fps=0,_fcount=0,_flast=performance.now();
+function tickFPS(){
+  _fcount++;
+  const now=performance.now();
+  if(now-_flast>=1000){
+    _fps=_fcount;_fcount=0;_flast=now;
+    document.getElementById('fps').textContent=_fps+' FPS';
+  }
+}
+// Pause rendering when tab is hidden
+let _visible=true;
+document.addEventListener('visibilitychange',()=>_visible=!document.hidden);
+
+// ================================================================
+//  SHARED PHYSICS
+// ================================================================
+function dipoleB(px,py,sx,sy,q){
+  const dx=px-sx,dy=py-sy,r=Math.sqrt(dx*dx+dy*dy)+.001,f=q/(r*r*r);
+  return{bx:dx*f,by:dy*f};
 }
 function fieldAt(px,py,poles){
   let bx=0,by=0;
-  for(const p of poles){
-    const d=dipoleB(px,py,p.x,p.y,p.q);
-    bx+=d.bx; by+=d.by;
+  for(let i=0;i<poles.length;i++){
+    const p=poles[i],dx=px-p.x,dy=py-p.y,r=Math.sqrt(dx*dx+dy*dy)+.001,f=p.q/(r*r*r);
+    bx+=dx*f;by+=dy*f;
   }
-  return {bx,by,mag:Math.sqrt(bx*bx+by*by)};
-}
-function hsl2rgb(h,s,l){
-  const c=(1-Math.abs(2*l-1))*s;
-  const x=c*(1-Math.abs(((h/60)%2)-1));
-  const m=l-c/2;
-  let r,g,b;
-  if(h<60){r=c;g=x;b=0}else if(h<120){r=x;g=c;b=0}
-  else if(h<180){r=0;g=c;b=x}else if(h<240){r=0;g=x;b=c}
-  else if(h<300){r=x;g=0;b=c}else{r=c;g=0;b=x}
-  return `rgb(${Math.round((r+m)*255)},${Math.round((g+m)*255)},${Math.round((b+m)*255)})`;
+  return{bx,by,mag:Math.sqrt(bx*bx+by*by)};
 }
 
-function getCtx(id, wrapId){
+// ================================================================
+//  SHARED CANVAS SETUP
+// ================================================================
+function getCtx(id,wrapId){
   const cvs=document.getElementById(id);
   const wrap=document.getElementById(wrapId);
-  const ctx=cvs.getContext('2d');
+  const ctx=cvs.getContext('2d',{alpha:false}); // alpha:false = faster compositing
   function resize(){
-    cvs.width=wrap.clientWidth*devicePixelRatio;
-    cvs.height=wrap.clientHeight*devicePixelRatio;
-    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    const dpr=Math.min(devicePixelRatio,2); // cap at 2x for perf
+    cvs.width=wrap.clientWidth*dpr;
+    cvs.height=wrap.clientHeight*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   }
   new ResizeObserver(resize).observe(wrap);
   resize();
-  return {cvs,ctx,W:()=>wrap.clientWidth, H:()=>wrap.clientHeight};
+  return{cvs,ctx,W:()=>wrap.clientWidth,H:()=>wrap.clientHeight};
+}
+
+// ================================================================
+//  SHARED NEEDLE DRAW (factored out — used by all sims)
+// ================================================================
+function drawNeedle(ctx,x,y,angle,size,alpha){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.globalAlpha=alpha;
+  ctx.beginPath();
+  ctx.moveTo(0,-size);ctx.lineTo(size*.22,0);ctx.lineTo(0,size);ctx.lineTo(-size*.22,0);
+  ctx.closePath();
+  const g1=ctx.createLinearGradient(0,-size,0,0);
+  g1.addColorStop(0,'#ff5252');g1.addColorStop(1,'#cc1133');
+  ctx.fillStyle=g1;ctx.save();ctx.clip();ctx.fillRect(-size,-size,size*2,size);ctx.restore();
+  const g2=ctx.createLinearGradient(0,0,0,size);
+  g2.addColorStop(0,'#e8eaf6');g2.addColorStop(1,'#9fa8da');
+  ctx.fillStyle=g2;ctx.save();ctx.clip();ctx.fillRect(-size,0,size*2,size);ctx.restore();
+  ctx.beginPath();
+  ctx.moveTo(0,-size);ctx.lineTo(size*.22,0);ctx.lineTo(0,size);ctx.lineTo(-size*.22,0);
+  ctx.closePath();ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=.8;ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,2.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+  ctx.globalAlpha=1;ctx.restore();
+}
+
+function drawGlow(ctx,x,y,r,color){
+  const g=ctx.createRadialGradient(x,y,0,x,y,r);
+  g.addColorStop(0,color.replace('rgb','rgba').replace(')',', .3)'));
+  g.addColorStop(1,color.replace('rgb','rgba').replace(')',', 0)'));
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
 }
 
 // ================================================================
 //  SIM 0 — BAR MAGNET + COMPASS NEEDLES
 // ================================================================
 const s0=(()=>{
-  const {cvs,ctx,W,H}=getCtx('c0','wrap0');
-  let magX,magY, flipped=false, strength=1.5;
-  let dragging=false, mouseX=0,mouseY=0;
+  const{cvs,ctx,W,H}=getCtx('c0','wrap0');
+  let magX=0,magY=0,flipped=false,strength=1.5;
+  let dragging=false,mouseX=0,mouseY=0;
   let fixedCompasses=[];
   let show={needles:true,field:true,lines:true,iron:false};
-  let animT=0;
+  let animT=0,dirty=true;
 
   function poles(){
-    const hw=50*strength*.6;
-    const nx=magX-(flipped?-hw:hw), ny=magY;
-    const sx=magX+(flipped?-hw:hw), sy=magY;
-    const q=strength*8e4;
-    return [{x:nx,y:ny,q:q,type:'N'},{x:sx,y:sy,q:-q,type:'S'}];
+    const hw=50*strength*.6,q=strength*8e4;
+    return[
+      {x:magX-(flipped?-hw:hw),y:magY,q},
+      {x:magX+(flipped?-hw:hw),y:magY,q:-q}
+    ];
   }
 
   function drawMagnet(){
-    const hw=50*strength*.6, hh=18;
+    const hw=50*strength*.6,hh=18;
     ctx.save();
-    // Shadow
-    ctx.shadowColor='rgba(0,0,0,.5)';
-    ctx.shadowBlur=20;
-    // N
-    const nr=flipped?1:0;
-    const Ncolor=nr?'#40c4ff':'#ff5252';
-    const Scolor=nr?'#ff5252':'#40c4ff';
-    ctx.fillStyle=Ncolor;
-    ctx.beginPath(); ctx.roundRect(magX-hw,magY-hh,hw,hh*2,6); ctx.fill();
-    ctx.fillStyle=Scolor;
-    ctx.beginPath(); ctx.roundRect(magX,magY-hh,hw,hh*2,6); ctx.fill();
-    ctx.shadowBlur=0;
-    ctx.fillStyle='#fff'; ctx.font='bold 15px system-ui';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(flipped?'S':'N', magX-hw/2, magY);
-    ctx.fillText(flipped?'N':'S', magX+hw/2, magY);
+    ctx.fillStyle=flipped?'#40c4ff':'#ff5252';
+    ctx.beginPath();ctx.roundRect(magX-hw,magY-hh,hw,hh*2,6);ctx.fill();
+    ctx.fillStyle=flipped?'#ff5252':'#40c4ff';
+    ctx.beginPath();ctx.roundRect(magX,magY-hh,hw,hh*2,6);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(flipped?'S':'N',magX-hw/2,magY);
+    ctx.fillText(flipped?'N':'S',magX+hw/2,magY);
     ctx.restore();
   }
 
-  function drawNeedle(x,y,angle,size,alpha){
-    ctx.save(); ctx.translate(x,y); ctx.rotate(angle);
-    ctx.globalAlpha=alpha;
-    // body
-    ctx.beginPath();
-    ctx.moveTo(0,-size); ctx.lineTo(size*.22,0); ctx.lineTo(0,size); ctx.lineTo(-size*.22,0);
-    ctx.closePath();
-    // north half red
-    const grad=ctx.createLinearGradient(0,-size,0,0);
-    grad.addColorStop(0,'#ff5252'); grad.addColorStop(1,'#cc1133');
-    ctx.fillStyle=grad; ctx.save();
-    ctx.clip(); ctx.fillRect(-size,-size,size*2,size); ctx.restore();
-    // south half white
-    const grad2=ctx.createLinearGradient(0,0,0,size);
-    grad2.addColorStop(0,'#e8eaf6'); grad2.addColorStop(1,'#9fa8da');
-    ctx.fillStyle=grad2; ctx.save();
-    ctx.clip(); ctx.fillRect(-size,0,size*2,size); ctx.restore();
-    // outline
-    ctx.beginPath();
-    ctx.moveTo(0,-size); ctx.lineTo(size*.22,0); ctx.lineTo(0,size); ctx.lineTo(-size*.22,0);
-    ctx.closePath();
-    ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=.8; ctx.stroke();
-    // pivot
-    ctx.beginPath(); ctx.arc(0,0,2.5,0,Math.PI*2);
-    ctx.fillStyle='#fff'; ctx.fill();
-    ctx.restore();
-  }
-
-  function drawVectorField(){
-    const step=52;
-    const ps=poles();
+  function drawVF(){
+    const step=54,ps=poles();
     for(let x=step*.5;x<W();x+=step){
       for(let y=step*.5;y<H();y+=step){
-        const dx=x-magX, dy=y-magY;
-        if(Math.sqrt(dx*dx+dy*dy)<60) continue;
-        const {bx,by,mag}=fieldAt(x,y,ps);
-        if(mag<.1) continue;
-        const angle=Math.atan2(by,bx);
-        const len=Math.min(20,mag*120+5);
-        const alpha=Math.min(.7,mag*.8+.08)*0.9;
-        ctx.save(); ctx.translate(x,y); ctx.rotate(angle);
-        ctx.strokeStyle=`rgba(0,230,118,${alpha})`; ctx.lineWidth=1.2;
-        ctx.beginPath(); ctx.moveTo(-len/2,0); ctx.lineTo(len/2,0); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(len/2-5,-3); ctx.lineTo(len/2,0); ctx.lineTo(len/2-5,3);
-        ctx.strokeStyle=`rgba(0,230,118,${alpha*1.3})`; ctx.stroke();
+        if(Math.hypot(x-magX,y-magY)<60)continue;
+        const{bx,by,mag}=fieldAt(x,y,ps);
+        if(mag<.1)continue;
+        const angle=Math.atan2(by,bx),len=Math.min(20,mag*120+5),a=Math.min(.65,mag*.8+.08);
+        ctx.save();ctx.translate(x,y);ctx.rotate(angle);
+        ctx.strokeStyle=`rgba(0,230,118,${a})`;ctx.lineWidth=1.1;
+        ctx.beginPath();ctx.moveTo(-len/2,0);ctx.lineTo(len/2,0);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(len/2-5,-3);ctx.lineTo(len/2,0);ctx.lineTo(len/2-5,3);
+        ctx.strokeStyle=`rgba(0,230,118,${a*1.3})`;ctx.stroke();
         ctx.restore();
       }
     }
   }
 
   function drawNeedles(){
-    const step=62;
-    const ps=poles();
+    const step=64,ps=poles();
     for(let x=step*.5;x<W();x+=step){
       for(let y=step*.5;y<H();y+=step){
-        const dx=x-magX, dy=y-magY;
-        if(Math.sqrt(dx*dx+dy*dy)<65) continue;
-        const {bx,by,mag}=fieldAt(x,y,ps);
-        if(mag<.05) continue;
-        const angle=Math.atan2(by,bx)+Math.PI/2;
-        drawNeedle(x,y,angle,13,Math.min(.9,mag*1.2+.2));
+        if(Math.hypot(x-magX,y-magY)<65)continue;
+        const{bx,by,mag}=fieldAt(x,y,ps);
+        if(mag<.05)continue;
+        drawNeedle(ctx,x,y,Math.atan2(by,bx)+Math.PI/2,13,Math.min(.9,mag*1.2+.2));
       }
     }
   }
 
-  // Runge-Kutta field line integration
-  function traceFieldLine(x0,y0,ps,steps,h,dir){
-    const pts=[[x0,y0]];
-    let x=x0,y=y0;
-    for(let i=0;i<steps;i++){
-      const k1=fieldAt(x,y,ps);
-      const m1=Math.sqrt(k1.bx*k1.bx+k1.by*k1.by)+.0001;
-      const dx1=dir*k1.bx/m1, dy1=dir*k1.by/m1;
-      const k2=fieldAt(x+h*dx1/2,y+h*dy1/2,ps);
-      const m2=Math.sqrt(k2.bx*k2.bx+k2.by*k2.by)+.0001;
-      const dx2=dir*k2.bx/m2, dy2=dir*k2.by/m2;
-      x+=h*dx2; y+=h*dy2;
-      if(x<-50||x>W()+50||y<-50||y>H()+50) break;
+  function traceFL(x0,y0,ps){
+    const pts=[[x0,y0]];let x=x0,y=y0;
+    for(let i=0;i<400;i++){
+      const{bx,by}=fieldAt(x,y,ps);
+      const m=Math.sqrt(bx*bx+by*by)+.0001;
+      const hbx=bx/m*1.5,hby=by/m*1.5;
+      const{bx:bx2,by:by2}=fieldAt(x+hbx,y+hby,ps);
+      const m2=Math.sqrt(bx2*bx2+by2*by2)+.0001;
+      x+=bx2/m2*3;y+=by2/m2*3;
+      if(x<-50||x>W()+50||y<-50||y>H()+50)break;
       pts.push([x,y]);
-      // stop near south pole
-      for(const p of ps){
-        if(p.q<0 && Math.hypot(x-p.x,y-p.y)<8) return pts;
+      for(let k=0;k<ps.length;k++){
+        if(ps[k].q<0&&Math.hypot(x-ps[k].x,y-ps[k].y)<8)return pts;
       }
     }
     return pts;
   }
 
-  function drawFieldLines(){
-    const ps=poles();
-    const N=ps.find(p=>p.q>0);
-    if(!N) return;
-    const nLines=12;
-    for(let i=0;i<nLines;i++){
-      const a=i*Math.PI*2/nLines;
-      const r=22;
-      const sx=N.x+Math.cos(a)*r, sy=N.y+Math.sin(a)*r;
-      const pts=traceFieldLine(sx,sy,ps,400,3,1);
-      if(pts.length<3) continue;
-      ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
-      for(let k=1;k<pts.length;k++) ctx.lineTo(pts[k][0],pts[k][1]);
-      ctx.strokeStyle='rgba(255,200,50,.45)'; ctx.lineWidth=1.2;
-      ctx.setLineDash([6,5]); ctx.stroke(); ctx.setLineDash([]);
-      // arrow mid
+  function drawFL(){
+    const ps=poles(),N=ps[0];
+    ctx.setLineDash([6,5]);
+    ctx.strokeStyle='rgba(255,200,50,.45)';ctx.lineWidth=1.2;
+    for(let i=0;i<12;i++){
+      const a=i*Math.PI*2/12,sx=N.x+Math.cos(a)*22,sy=N.y+Math.sin(a)*22;
+      const pts=traceFL(sx,sy,ps);if(pts.length<3)continue;
+      ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+      for(let k=1;k<pts.length;k++)ctx.lineTo(pts[k][0],pts[k][1]);
+      ctx.stroke();
       const mid=Math.floor(pts.length/2);
       if(mid>0){
-        const dx=pts[mid][0]-pts[mid-1][0], dy=pts[mid][1]-pts[mid-1][1];
-        const a2=Math.atan2(dy,dx);
-        ctx.save(); ctx.translate(pts[mid][0],pts[mid][1]); ctx.rotate(a2);
-        ctx.strokeStyle='rgba(255,200,50,.7)'; ctx.lineWidth=1.2;
-        ctx.beginPath(); ctx.moveTo(-5,-3); ctx.lineTo(0,0); ctx.lineTo(-5,3); ctx.stroke();
-        ctx.restore();
+        const dx=pts[mid][0]-pts[mid-1][0],dy=pts[mid][1]-pts[mid-1][1];
+        ctx.save();ctx.translate(pts[mid][0],pts[mid][1]);ctx.rotate(Math.atan2(dy,dx));
+        ctx.setLineDash([]);ctx.strokeStyle='rgba(255,200,50,.8)';
+        ctx.beginPath();ctx.moveTo(-5,-3);ctx.lineTo(0,0);ctx.lineTo(-5,3);ctx.stroke();
+        ctx.restore();ctx.setLineDash([6,5]);
       }
     }
+    ctx.setLineDash([]);
   }
 
-  function drawIronFiling(){
-    const ps=poles();
-    const step=18;
+  function drawIron(){
+    const ps=poles(),step=18;
     for(let x=step*.5;x<W();x+=step){
       for(let y=step*.5;y<H();y+=step){
-        const dx=x-magX, dy=y-magY;
-        if(Math.sqrt(dx*dx+dy*dy)<55) continue;
-        const {bx,by,mag}=fieldAt(x,y,ps);
-        if(mag<.05) continue;
-        const angle=Math.atan2(by,bx);
-        const a2=Math.sin(animT*2+x*.05+y*.03)*.1; // subtle wiggle
-        const len=7;
-        const alpha=Math.min(.6,mag*50+.08);
-        ctx.save(); ctx.translate(x,y); ctx.rotate(angle+a2);
-        ctx.strokeStyle=`rgba(180,160,100,${alpha})`; ctx.lineWidth=.8;
-        ctx.beginPath(); ctx.moveTo(-len,0); ctx.lineTo(len,0); ctx.stroke();
+        if(Math.hypot(x-magX,y-magY)<55)continue;
+        const{bx,by,mag}=fieldAt(x,y,ps);if(mag<.05)continue;
+        const a=Math.min(.55,mag*50+.08);
+        ctx.save();ctx.translate(x,y);
+        ctx.rotate(Math.atan2(by,bx)+Math.sin(animT*2+x*.05+y*.03)*.1);
+        ctx.strokeStyle=`rgba(180,160,100,${a})`;ctx.lineWidth=.8;
+        ctx.beginPath();ctx.moveTo(-7,0);ctx.lineTo(7,0);ctx.stroke();
         ctx.restore();
       }
     }
   }
 
-  function drawGlow(x,y,color,r){
-    const g=ctx.createRadialGradient(x,y,0,x,y,r);
-    g.addColorStop(0,color.replace(')',',0.35)').replace('rgb','rgba'));
-    g.addColorStop(1,color.replace(')',',0)').replace('rgb','rgba'));
-    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-  }
-
-  function render(){
+  function render(ts){
+    if(!_visible){requestAnimationFrame(render);return;}
     requestAnimationFrame(render);
+    tickFPS();
     animT+=.016;
     const w=W(),h=H();
     if(!magX){magX=w/2;magY=h/2;}
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle='#060810'; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='#060810';ctx.fillRect(0,0,w,h);
     const ps=poles();
-    // pole glows
-    drawGlow(ps[0].x,ps[0].y,'rgb(255,82,82)',55);
-    drawGlow(ps[1].x,ps[1].y,'rgb(64,196,255)',55);
-    if(show.iron) drawIronFiling();
-    if(show.lines) drawFieldLines();
-    if(show.field) drawVectorField();
-    if(show.needles) drawNeedles();
-    // fixed compasses
-    for(const c of fixedCompasses){
-      const {bx,by,mag}=fieldAt(c.x,c.y,ps);
-      const angle=Math.atan2(by,bx)+Math.PI/2;
-      drawNeedle(c.x,c.y,angle,16,.95);
-      ctx.beginPath(); ctx.arc(c.x,c.y,18,0,Math.PI*2);
-      ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1; ctx.stroke();
+    drawGlow(ctx,ps[0].x,ps[0].y,55,'rgb(255,82,82)');
+    drawGlow(ctx,ps[1].x,ps[1].y,55,'rgb(64,196,255)');
+    if(show.iron)drawIron();
+    if(show.lines)drawFL();
+    if(show.field)drawVF();
+    if(show.needles)drawNeedles();
+    for(let i=0;i<fixedCompasses.length;i++){
+      const c=fixedCompasses[i];
+      const{bx,by}=fieldAt(c.x,c.y,ps);
+      drawNeedle(ctx,c.x,c.y,Math.atan2(by,bx)+Math.PI/2,16,.95);
+      ctx.beginPath();ctx.arc(c.x,c.y,18,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=1;ctx.stroke();
     }
     drawMagnet();
-    // cursor readout
-    const {bx,by,mag}=fieldAt(mouseX,mouseY,ps);
+    const{bx,by,mag}=fieldAt(mouseX,mouseY,ps);
     document.getElementById('s0-bmag').textContent=(mag*1000).toFixed(2);
     document.getElementById('s0-bang').textContent=Math.round(Math.atan2(by,bx)*180/Math.PI)+'°';
     document.getElementById('s0-pos').textContent=`x=${Math.round(mouseX-w/2)}, y=${Math.round(h/2-mouseY)}`;
   }
 
-  cvs.addEventListener('mousedown',e=>{
-    const r=cvs.getBoundingClientRect();
-    const x=(e.clientX-r.left), y=(e.clientY-r.top);
-    if(Math.hypot(x-magX,y-magY)<60) dragging=true;
-    else fixedCompasses.push({x,y});
-  });
-  cvs.addEventListener('mousemove',e=>{
-    const r=cvs.getBoundingClientRect();
-    mouseX=e.clientX-r.left; mouseY=e.clientY-r.top;
-    if(dragging){magX=mouseX;magY=mouseY;}
-  });
-  cvs.addEventListener('mouseup',()=>dragging=false);
-  cvs.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];const r=cvs.getBoundingClientRect();mouseX=t.clientX-r.left;mouseY=t.clientY-r.top;if(Math.hypot(mouseX-magX,mouseY-magY)<60)dragging=true;},{passive:false});
-  cvs.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];const r=cvs.getBoundingClientRect();mouseX=t.clientX-r.left;mouseY=t.clientY-r.top;if(dragging){magX=mouseX;magY=mouseY;}},{passive:false});
-  cvs.addEventListener('touchend',()=>dragging=false);
+  function onDown(x,y){if(Math.hypot(x-magX,y-magY)<60)dragging=true;else fixedCompasses.push({x,y});}
+  function onMove(x,y){mouseX=x;mouseY=y;if(dragging){magX=x;magY=y;}}
+  function onUp(){dragging=false;}
+
+  cvs.addEventListener('mousedown',e=>{const r=cvs.getBoundingClientRect();onDown(e.clientX-r.left,e.clientY-r.top);});
+  cvs.addEventListener('mousemove',e=>{const r=cvs.getBoundingClientRect();onMove(e.clientX-r.left,e.clientY-r.top);});
+  cvs.addEventListener('mouseup',onUp);
+  cvs.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0],r=cvs.getBoundingClientRect();onDown(t.clientX-r.left,t.clientY-r.top);},{passive:false});
+  cvs.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0],r=cvs.getBoundingClientRect();onMove(t.clientX-r.left,t.clientY-r.top);},{passive:false});
+  cvs.addEventListener('touchend',onUp);
 
   document.getElementById('s0-str').oninput=function(){strength=parseFloat(this.value);document.getElementById('s0-str-v').textContent=this.value;};
-
-  render();
-  return {
+  requestAnimationFrame(render);
+  return{
     flip:()=>{flipped=!flipped;},
     reset:()=>{magX=W()/2;magY=H()/2;flipped=false;fixedCompasses=[];},
-    toggle:(key,el)=>{show[key]=!show[key];el.classList.toggle('on',show[key]);}
+    toggle:(k,el)=>{show[k]=!show[k];el.classList.toggle('on',show[k]);}
   };
 })();
 
 // ================================================================
-//  SIM 1 — FIL RECTILIGNE (OERSTED)
+//  SIM 1 — OERSTED WIRE
 // ================================================================
 const s1=(()=>{
-  const {cvs,ctx,W,H}=getCtx('c1','wrap1');
-  let current=5, dirUp=true;
-  let mouseX=0,mouseY=0;
+  const{cvs,ctx,W,H}=getCtx('c1','wrap1');
+  let current=5,dirUp=true,mouseX=0,mouseY=0,animT=0;
   let show={needles:true,circles:true,vecs:true};
-  let animT=0;
   const MU0=4*Math.PI*1e-7;
 
-  // field of infinite straight wire
   function wireB(px,py){
-    const cx=W()/2, cy=H()/2;
-    const dx=px-cx, dy=py-cy;
-    const r=Math.sqrt(dx*dx+dy*dy)+.001;
-    const Bmag=MU0*current/(2*Math.PI*(r/200)); // r in meters (scale 200px=1m)
-    const dir=dirUp?1:-1;
-    // tangential: perpendicular to r, direction by right-hand rule
-    const tx=-dy/r, ty=dx/r;
-    return {bx:Bmag*tx*dir,by:Bmag*ty*dir,mag:Bmag,r};
+    const cx=W()/2,dx=px-cx,dy=py-H()/2,r=Math.sqrt(dx*dx+dy*dy)+.001;
+    const B=MU0*current/(2*Math.PI*(r/200)),dir=dirUp?1:-1;
+    return{bx:B*(-dy/r)*dir,by:B*(dx/r)*dir,mag:B,r};
   }
 
   function drawWire(){
-    const cx=W()/2, cy=H()/2;
-    // wire body
-    const grad=ctx.createLinearGradient(cx-8,0,cx+8,0);
-    grad.addColorStop(0,'#1a1a3e'); grad.addColorStop(.5,'#555'); grad.addColorStop(1,'#1a1a3e');
-    ctx.fillStyle=grad; ctx.fillRect(cx-8,0,16,H());
-    ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=1;
-    ctx.strokeRect(cx-8,0,16,H());
-    // current symbol
-    const step=60;
-    for(let y=step/2;y<H();y+=step){
-      ctx.save(); ctx.translate(cx,y);
+    const cx=W()/2;
+    const g=ctx.createLinearGradient(cx-8,0,cx+8,0);
+    g.addColorStop(0,'#0d0d24');g.addColorStop(.5,'#666');g.addColorStop(1,'#0d0d24');
+    ctx.fillStyle=g;ctx.fillRect(cx-8,0,16,H());
+    ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;ctx.strokeRect(cx-8,0,16,H());
+    for(let y=30;y<H();y+=60){
+      ctx.save();ctx.translate(cx,y);
       if(dirUp){
-        // dot (coming out)
-        ctx.beginPath(); ctx.arc(0,0,4,0,Math.PI*2);
-        ctx.fillStyle='#ffca28'; ctx.fill();
-        ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2);
-        ctx.strokeStyle='rgba(255,202,40,.5)'; ctx.lineWidth=1; ctx.stroke();
-      } else {
-        // cross (going in)
-        ctx.strokeStyle='#ffca28'; ctx.lineWidth=2;
-        ctx.beginPath(); ctx.moveTo(-4,-4); ctx.lineTo(4,4); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(4,-4); ctx.lineTo(-4,4); ctx.stroke();
+        ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fillStyle='#ffca28';ctx.fill();
+        ctx.beginPath();ctx.arc(0,0,7,0,Math.PI*2);ctx.strokeStyle='rgba(255,202,40,.45)';ctx.lineWidth=1;ctx.stroke();
+      }else{
+        ctx.strokeStyle='#ffca28';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(-4,-4);ctx.lineTo(4,4);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(4,-4);ctx.lineTo(-4,4);ctx.stroke();
       }
       ctx.restore();
     }
-    // label
-    ctx.fillStyle='#ffca28'; ctx.font='bold 12px monospace';
-    ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.fillText('I = '+current.toFixed(1)+' A', cx, 8);
+    ctx.fillStyle='#ffca28';ctx.font='bold 11px monospace';
+    ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillText('I='+current.toFixed(1)+'A',cx,8);
   }
 
-  function drawCircularLines(){
-    const cx=W()/2, cy=H()/2;
-    const maxR=Math.max(W(),H());
-    for(let r=40;r<maxR;r+=45){
-      const alpha=Math.min(.45, 3/(r/40));
-      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(0,230,118,${alpha})`;
-      ctx.lineWidth=1; ctx.setLineDash([8,6]);
-      ctx.lineDashOffset=-(animT*20)%(14);
-      ctx.stroke(); ctx.setLineDash([]);
-      // arrow on circle
-      const a=(dirUp?1:-1)*(Math.PI/2+animT*.3);
-      const ax=cx+r*Math.cos(a), ay=cy+r*Math.sin(a);
-      const ta=-Math.sin(a)*(dirUp?1:-1), tb=Math.cos(a)*(dirUp?1:-1);
-      ctx.save(); ctx.translate(ax,ay); ctx.rotate(Math.atan2(tb,ta));
-      ctx.strokeStyle=`rgba(0,230,118,${alpha*1.5})`; ctx.lineWidth=1.2;
-      ctx.beginPath(); ctx.moveTo(-5,-3); ctx.lineTo(0,0); ctx.lineTo(-5,3); ctx.stroke();
+  function drawCircles(){
+    const cx=W()/2,cy=H()/2;
+    for(let r=40;r<Math.max(W(),H());r+=45){
+      const a=Math.min(.42,3/(r/40));
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(0,230,118,${a})`;ctx.lineWidth=1;
+      ctx.setLineDash([8,6]);ctx.lineDashOffset=-(animT*20)%14;ctx.stroke();ctx.setLineDash([]);
+      const aa=(dirUp?1:-1)*(Math.PI/2+animT*.3);
+      const ax=cx+r*Math.cos(aa),ay=cy+r*Math.sin(aa);
+      ctx.save();ctx.translate(ax,ay);ctx.rotate(Math.atan2(Math.cos(aa)*(dirUp?1:-1),-Math.sin(aa)*(dirUp?1:-1)));
+      ctx.strokeStyle=`rgba(0,230,118,${a*1.5})`;ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.moveTo(-5,-3);ctx.lineTo(0,0);ctx.lineTo(-5,3);ctx.stroke();
       ctx.restore();
     }
   }
 
   function drawVecs(){
-    const step=55;
-    const cx=W()/2, cy=H()/2;
-    for(let x=step*.5;x<W();x+=step){
-      for(let y=step*.5;y<H();y+=step){
-        if(Math.abs(x-cx)<20) continue;
-        const {bx,by,mag}=wireB(x,y);
-        if(mag<1e-8) continue;
-        const angle=Math.atan2(by,bx);
-        const r=Math.hypot(x-cx,y-cy);
-        const alpha=Math.min(.7,50/(r/40+1));
-        const len=Math.min(18,alpha*20+4);
-        ctx.save(); ctx.translate(x,y); ctx.rotate(angle);
-        ctx.strokeStyle=`rgba(64,196,255,${alpha})`; ctx.lineWidth=1.2;
-        ctx.beginPath(); ctx.moveTo(-len/2,0); ctx.lineTo(len/2,0); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(len/2-5,-3); ctx.lineTo(len/2,0); ctx.lineTo(len/2-5,3); ctx.stroke();
+    const cx=W()/2;
+    for(let x=56*.5;x<W();x+=56){
+      for(let y=56*.5;y<H();y+=56){
+        if(Math.abs(x-cx)<20)continue;
+        const{bx,by}=wireB(x,y),r=Math.hypot(x-cx,y-H()/2);
+        const a=Math.min(.65,50/(r/40+1)),len=Math.min(18,a*20+4);
+        ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(by,bx));
+        ctx.strokeStyle=`rgba(64,196,255,${a})`;ctx.lineWidth=1.1;
+        ctx.beginPath();ctx.moveTo(-len/2,0);ctx.lineTo(len/2,0);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(len/2-5,-3);ctx.lineTo(len/2,0);ctx.lineTo(len/2-5,3);ctx.stroke();
         ctx.restore();
       }
     }
   }
 
   function drawNeedles(){
-    const step=70;
     const cx=W()/2;
-    for(let x=step*.5;x<W();x+=step){
-      for(let y=step*.5;y<H();y+=step){
-        if(Math.abs(x-cx)<25) continue;
-        const {bx,by,mag}=wireB(x,y);
-        if(mag<1e-9) continue;
-        const angle=Math.atan2(by,bx)+Math.PI/2;
-        const r=Math.hypot(x-cx,y-W()/2);
-        const alpha=Math.min(.95,80/(r/30+1));
-        // draw needle with circle
-        ctx.save(); ctx.translate(x,y);
-        ctx.beginPath(); ctx.arc(0,0,16,0,Math.PI*2);
-        ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=.8; ctx.stroke();
-        ctx.restore();
-        s0obj.needle(ctx,x,y,angle,13,alpha);
+    for(let x=72*.5;x<W();x+=72){
+      for(let y=72*.5;y<H();y+=72){
+        if(Math.abs(x-cx)<26)continue;
+        const{bx,by}=wireB(x,y),r=Math.hypot(x-cx,y-H()/2);
+        const a=Math.min(.9,80/(r/30+1));
+        ctx.save();ctx.translate(x,y);ctx.beginPath();ctx.arc(0,0,15,0,Math.PI*2);
+        ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=.7;ctx.stroke();ctx.restore();
+        drawNeedle(ctx,x,y,Math.atan2(by,bx)+Math.PI/2,13,a);
       }
     }
   }
 
   function render(){
+    if(!_visible){requestAnimationFrame(render);return;}
     requestAnimationFrame(render);
     animT+=.016;
-    const w=W(),h=H();
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle='#060810'; ctx.fillRect(0,0,w,h);
-    if(show.circles) drawCircularLines();
-    if(show.vecs) drawVecs();
-    if(show.needles) drawNeedles();
+    ctx.fillStyle='#060810';ctx.fillRect(0,0,W(),H());
+    if(show.circles)drawCircles();
+    if(show.vecs)drawVecs();
+    if(show.needles)drawNeedles();
     drawWire();
-    // readout
-    const {mag,r}=wireB(mouseX,mouseY);
+    const{mag,r}=wireB(mouseX,mouseY);
     document.getElementById('s1-bmag').textContent=(mag*1e6).toFixed(3);
     document.getElementById('s1-r').textContent=(r/200*100).toFixed(1);
     document.getElementById('s1-pos').textContent=`r=${(r/200*100).toFixed(1)} cm`;
   }
 
   cvs.addEventListener('mousemove',e=>{const r=cvs.getBoundingClientRect();mouseX=e.clientX-r.left;mouseY=e.clientY-r.top;});
+  cvs.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0],r=cvs.getBoundingClientRect();mouseX=t.clientX-r.left;mouseY=t.clientY-r.top;},{passive:false});
   document.getElementById('s1-I').oninput=function(){current=parseFloat(this.value);document.getElementById('s1-I-v').textContent=this.value+' A';};
-
-  render();
-  return {
-    toggle:(key,el)=>{show[key]=!show[key];el.classList.toggle('on',show[key]);},
-    toggleDir:(el)=>{
-      dirUp=!dirUp;
-      el.textContent=dirUp?'↑ Sens +':'↓ Sens −';
-      el.classList.toggle('on',dirUp);
-    }
+  requestAnimationFrame(render);
+  return{
+    toggle:(k,el)=>{show[k]=!show[k];el.classList.toggle('on',show[k]);},
+    toggleDir:(el)=>{dirUp=!dirUp;el.textContent=dirUp?'↑ Sens +':'↓ Sens −';el.classList.toggle('on',dirUp);}
   };
 })();
 
-// shared needle draw
-const s0obj={needle:(ctx,x,y,angle,size,alpha)=>{
-  ctx.save(); ctx.translate(x,y); ctx.rotate(angle); ctx.globalAlpha=alpha;
-  ctx.beginPath();
-  ctx.moveTo(0,-size); ctx.lineTo(size*.22,0); ctx.lineTo(0,size); ctx.lineTo(-size*.22,0);
-  ctx.closePath();
-  const g1=ctx.createLinearGradient(0,-size,0,0); g1.addColorStop(0,'#ff5252'); g1.addColorStop(1,'#cc1133');
-  ctx.fillStyle=g1; ctx.save(); ctx.clip(); ctx.fillRect(-size,-size,size*2,size); ctx.restore();
-  const g2=ctx.createLinearGradient(0,0,0,size); g2.addColorStop(0,'#e8eaf6'); g2.addColorStop(1,'#9fa8da');
-  ctx.fillStyle=g2; ctx.save(); ctx.clip(); ctx.fillRect(-size,0,size*2,size); ctx.restore();
-  ctx.beginPath(); ctx.moveTo(0,-size); ctx.lineTo(size*.22,0); ctx.lineTo(0,size); ctx.lineTo(-size*.22,0);
-  ctx.closePath(); ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=.8; ctx.stroke();
-  ctx.beginPath(); ctx.arc(0,0,2.5,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
-  ctx.restore();
-}};
-
 // ================================================================
-//  SIM 2 — FIELD LINES (RK4 integration, draggable poles)
+//  SIM 2 — RK4 FIELD LINES
 // ================================================================
 const s2=(()=>{
-  const {cvs,ctx,W,H}=getCtx('c2','wrap2');
+  const{cvs,ctx,W,H}=getCtx('c2','wrap2');
   let poles=[{x:0,y:0,q:1e5,id:0},{x:0,y:0,q:-1e5,id:1}];
-  let nLines=12, steps=300;
-  let dragging=null, dragOff={x:0,y:0};
-  let show={arrows:true,poles:true,mag:false};
-  let nextId=2, mouseX=0,mouseY=0;
+  let nLines=12,steps=300,dragging=null,dragOff={x:0,y:0};
+  let show={arrows:true,poles:true,mag:false},nextId=2;
 
   function initPoles(){poles[0].x=W()*.38;poles[0].y=H()*.5;poles[1].x=W()*.62;poles[1].y=H()*.5;}
 
-  function rk4step(x,y,h,dir){
-    function deriv(px,py){
+  function rk4(x,y,h){
+    function d(px,py){
       let bx=0,by=0;
-      for(const p of poles){
-        const d=dipoleB(px,py,p.x,p.y,p.q);
-        bx+=d.bx; by+=d.by;
-      }
-      const m=Math.sqrt(bx*bx+by*by)+.0001;
-      return {dx:dir*bx/m,dy:dir*by/m};
+      for(let i=0;i<poles.length;i++){const p=poles[i],dx=px-p.x,dy=py-p.y,r=Math.sqrt(dx*dx+dy*dy)+.001,f=p.q/(r*r*r);bx+=dx*f;by+=dy*f;}
+      const m=Math.sqrt(bx*bx+by*by)+.0001;return{dx:bx/m,dy:by/m};
     }
-    const k1=deriv(x,y);
-    const k2=deriv(x+h*k1.dx/2,y+h*k1.dy/2);
-    const k3=deriv(x+h*k2.dx/2,y+h*k2.dy/2);
-    const k4=deriv(x+h*k3.dx,y+h*k3.dy);
-    return {
-      nx:x+h*(k1.dx+2*k2.dx+2*k3.dx+k4.dx)/6,
-      ny:y+h*(k1.dy+2*k2.dy+2*k3.dy+k4.dy)/6
-    };
+    const k1=d(x,y),k2=d(x+h*k1.dx/2,y+h*k1.dy/2),k3=d(x+h*k2.dx/2,y+h*k2.dy/2),k4=d(x+h*k3.dx,y+h*k3.dy);
+    return{nx:x+h*(k1.dx+2*k2.dx+2*k3.dx+k4.dx)/6,ny:y+h*(k1.dy+2*k2.dy+2*k3.dy+k4.dy)/6};
   }
 
-  function traceLine(x0,y0,dir){
-    const pts=[[x0,y0]];
-    let x=x0,y=y0;
-    const h=4;
+  function traceLine(x0,y0){
+    const pts=[[x0,y0]];let x=x0,y=y0;
     for(let i=0;i<steps;i++){
-      const {nx,ny}=rk4step(x,y,h,dir);
-      x=nx; y=ny;
-      pts.push([x,y]);
-      if(x<-80||x>W()+80||y<-80||y>H()+80) break;
-      // stop near negative pole
-      for(const p of poles){
-        if(p.q<0 && Math.hypot(x-p.x,y-p.y)<10) return pts;
-      }
+      const{nx,ny}=rk4(x,y,4);x=nx;y=ny;pts.push([x,y]);
+      if(x<-80||x>W()+80||y<-80||y>H()+80)break;
+      for(let k=0;k<poles.length;k++){if(poles[k].q<0&&Math.hypot(x-poles[k].x,y-poles[k].y)<10)return pts;}
     }
     return pts;
   }
 
   function drawLines(){
-    for(const p of poles){
-      if(p.q<=0) continue;
+    ctx.strokeStyle='rgba(255,210,60,.6)';ctx.lineWidth=1.3;ctx.setLineDash([]);
+    for(let pi=0;pi<poles.length;pi++){
+      const p=poles[pi];if(p.q<=0)continue;
       for(let i=0;i<nLines;i++){
-        const a=i*Math.PI*2/nLines;
-        const r=18;
-        const sx=p.x+Math.cos(a)*r, sy=p.y+Math.sin(a)*r;
-        const pts=traceLine(sx,sy,1);
-        if(pts.length<2) continue;
-        ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
-        for(let k=1;k<pts.length;k++) ctx.lineTo(pts[k][0],pts[k][1]);
-        ctx.strokeStyle='rgba(255,210,60,.6)'; ctx.lineWidth=1.3;
-        ctx.setLineDash([]); ctx.stroke();
+        const a=i*Math.PI*2/nLines,pts=traceLine(p.x+Math.cos(a)*18,p.y+Math.sin(a)*18);
+        if(pts.length<2)continue;
+        ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+        for(let k=1;k<pts.length;k++)ctx.lineTo(pts[k][0],pts[k][1]);
+        ctx.stroke();
         if(show.arrows){
           const m=Math.floor(pts.length*.45);
           if(m>1){
-            const dx=pts[m][0]-pts[m-1][0], dy=pts[m][1]-pts[m-1][1];
-            const aa=Math.atan2(dy,dx);
-            ctx.save(); ctx.translate(pts[m][0],pts[m][1]); ctx.rotate(aa);
-            ctx.strokeStyle='rgba(255,210,60,.9)'; ctx.lineWidth=1.5;
-            ctx.beginPath(); ctx.moveTo(-6,-4); ctx.lineTo(0,0); ctx.lineTo(-6,4); ctx.stroke();
-            ctx.restore();
+            const dx=pts[m][0]-pts[m-1][0],dy=pts[m][1]-pts[m-1][1];
+            ctx.save();ctx.translate(pts[m][0],pts[m][1]);ctx.rotate(Math.atan2(dy,dx));
+            ctx.strokeStyle='rgba(255,210,60,.95)';ctx.lineWidth=1.5;
+            ctx.beginPath();ctx.moveTo(-6,-4);ctx.lineTo(0,0);ctx.lineTo(-6,4);ctx.stroke();
+            ctx.restore();ctx.strokeStyle='rgba(255,210,60,.6)';ctx.lineWidth=1.3;
           }
         }
       }
@@ -829,91 +748,48 @@ const s2=(()=>{
   }
 
   function drawPoles(){
-    for(const p of poles){
-      const isN=p.q>0;
-      const color=isN?'#ff5252':'#40c4ff';
-      const glow=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,35);
-      glow.addColorStop(0,isN?'rgba(255,82,82,.35)':'rgba(64,196,255,.35)');
-      glow.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(p.x,p.y,35,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(p.x,p.y,16,0,Math.PI*2);
-      ctx.fillStyle=color; ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5; ctx.stroke();
-      ctx.fillStyle='#fff'; ctx.font='bold 13px system-ui';
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(isN?'N':'S',p.x,p.y);
+    for(let i=0;i<poles.length;i++){
+      const p=poles[i],isN=p.q>0;
+      drawGlow(ctx,p.x,p.y,35,isN?'rgb(255,82,82)':'rgb(64,196,255)');
+      ctx.beginPath();ctx.arc(p.x,p.y,16,0,Math.PI*2);
+      ctx.fillStyle=isN?'#ff5252':'#40c4ff';ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='bold 12px system-ui';
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(isN?'N':'S',p.x,p.y);
     }
-  }
-
-  function drawMagField(){
-    const step=50;
-    for(let x=step*.5;x<W();x+=step){
-      for(let y=step*.5;y<H();y+=step){
-        const {bx,by,mag}=fieldAt(x,y,poles);
-        if(mag<.5) continue;
-        const angle=Math.atan2(by,bx);
-        const alpha=Math.min(.5,mag*.0008+.05);
-        const len=Math.min(16,mag*.004+5);
-        ctx.save(); ctx.translate(x,y); ctx.rotate(angle);
-        ctx.strokeStyle=`rgba(0,230,118,${alpha})`; ctx.lineWidth=1;
-        ctx.beginPath(); ctx.moveTo(-len/2,0); ctx.lineTo(len/2,0); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(len*.4,-3); ctx.lineTo(len/2,0); ctx.lineTo(len*.4,3); ctx.stroke();
-        ctx.restore();
-      }
-    }
-  }
-
-  function drawBackground(){
-    // optional field magnitude heatmap
-    if(!show.mag) return;
-    const idata=ctx.createImageData(W(),H());
-    for(let x=0;x<W();x+=2){
-      for(let y=0;y<H();y+=2){
-        const {mag}=fieldAt(x,y,poles);
-        const v=Math.min(255,mag*.3);
-        const idx=(y*W()+x)*4;
-        idata.data[idx]=0; idata.data[idx+1]=Math.round(v); idata.data[idx+2]=Math.round(v*.4); idata.data[idx+3]=60;
-      }
-    }
-    ctx.putImageData(idata,0,0);
   }
 
   function render(){
+    if(!_visible){requestAnimationFrame(render);return;}
     requestAnimationFrame(render);
-    const w=W(),h=H();
-    if(poles[0].x===0) initPoles();
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle='#060810'; ctx.fillRect(0,0,w,h);
-    drawBackground();
-    drawLines();
-    if(show.poles) drawPoles();
+    const w=W(),h=H();if(poles[0].x===0)initPoles();
+    ctx.fillStyle='#060810';ctx.fillRect(0,0,w,h);
+    if(show.mag){
+      const idata=ctx.createImageData(w,h);
+      for(let x=0;x<w;x+=2){for(let y=0;y<h;y+=2){
+        const{mag}=fieldAt(x,y,poles),v=Math.min(255,mag*.3),idx=(y*w+x)*4;
+        idata.data[idx]=0;idata.data[idx+1]=Math.round(v);idata.data[idx+2]=Math.round(v*.4);idata.data[idx+3]=60;
+      }}
+      ctx.putImageData(idata,0,0);
+    }
+    drawLines();if(show.poles)drawPoles();
     document.getElementById('s2-info').textContent=poles.length+' pôle'+(poles.length>1?'s':'')+' actifs';
   }
 
-  cvs.addEventListener('mousedown',e=>{
-    const r=cvs.getBoundingClientRect();
-    const mx=e.clientX-r.left, my=e.clientY-r.top;
-    for(const p of poles){
-      if(Math.hypot(mx-p.x,my-p.y)<22){dragging=p;dragOff={x:mx-p.x,y:my-p.y};return;}
-    }
-  });
-  cvs.addEventListener('mousemove',e=>{
-    const r=cvs.getBoundingClientRect();
-    mouseX=e.clientX-r.left; mouseY=e.clientY-r.top;
-    if(dragging){dragging.x=mouseX-dragOff.x;dragging.y=mouseY-dragOff.y;}
-  });
-  cvs.addEventListener('mouseup',()=>dragging=null);
+  function onDown(mx,my){for(let i=0;i<poles.length;i++){if(Math.hypot(mx-poles[i].x,my-poles[i].y)<24){dragging=poles[i];dragOff={x:mx-poles[i].x,y:my-poles[i].y};return;}}}
+  function onMove(mx,my){if(dragging){dragging.x=mx-dragOff.x;dragging.y=my-dragOff.y;}}
+  function onUp(){dragging=null;}
 
-  // touch
-  cvs.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];const r=cvs.getBoundingClientRect();const mx=t.clientX-r.left,my=t.clientY-r.top;for(const p of poles){if(Math.hypot(mx-p.x,my-p.y)<28){dragging=p;dragOff={x:mx-p.x,y:my-p.y};return;}}},{passive:false});
-  cvs.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];const r=cvs.getBoundingClientRect();if(dragging){dragging.x=t.clientX-r.left-dragOff.x;dragging.y=t.clientY-r.top-dragOff.y;}},{passive:false});
-  cvs.addEventListener('touchend',()=>dragging=null);
-
+  cvs.addEventListener('mousedown',e=>{const r=cvs.getBoundingClientRect();onDown(e.clientX-r.left,e.clientY-r.top);});
+  cvs.addEventListener('mousemove',e=>{const r=cvs.getBoundingClientRect();onMove(e.clientX-r.left,e.clientY-r.top);});
+  cvs.addEventListener('mouseup',onUp);
+  cvs.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0],r=cvs.getBoundingClientRect();onDown(t.clientX-r.left,t.clientY-r.top);},{passive:false});
+  cvs.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0],r=cvs.getBoundingClientRect();onMove(t.clientX-r.left,t.clientY-r.top);},{passive:false});
+  cvs.addEventListener('touchend',onUp);
   document.getElementById('s2-nlines').oninput=function(){nLines=parseInt(this.value);document.getElementById('s2-nlines-v').textContent=this.value;};
   document.getElementById('s2-steps').oninput=function(){steps=parseInt(this.value);document.getElementById('s2-steps-v').textContent=this.value;};
-
-  render();
-  return {
+  requestAnimationFrame(render);
+  return{
     toggle:(k,el)=>{show[k]=!show[k];el.classList.toggle('on',show[k]);},
     addNorth:()=>{poles.push({x:W()*.5+Math.random()*80-40,y:H()*.5+Math.random()*80-40,q:1e5,id:nextId++});},
     addSouth:()=>{poles.push({x:W()*.5+Math.random()*80-40,y:H()*.5+Math.random()*80-40,q:-1e5,id:nextId++});},
@@ -922,167 +798,114 @@ const s2=(()=>{
 })();
 
 // ================================================================
-//  SIM 3 — HORSESHOE MAGNET / UNIFORM FIELD
+//  SIM 3 — UNIFORM FIELD (horseshoe magnet)
 // ================================================================
 const s3=(()=>{
-  const {cvs,ctx,W,H}=getCtx('c3','wrap3');
-  let gap=100, strength=2, flipped=false;
-  let probeX=0,probeY=0, animT=0;
+  const{cvs,ctx,W,H}=getCtx('c3','wrap3');
+  let gap=100,strength=2,flipped=false,probeX=0,probeY=0,animT=0;
   let show={field:true,lines:true,probe:true};
-  const MU=4*Math.PI*1e-7;
 
   function getPoles(){
-    const cx=W()/2, cy=H()/2;
-    const g=gap/2;
-    const q=strength*1e5;
-    return [
-      {x:cx,y:cy-g,q:flipped?-q:q,type:flipped?'S':'N'},
-      {x:cx,y:cy+g,q:flipped?q:-q,type:flipped?'N':'S'}
-    ];
+    const cx=W()/2,cy=H()/2,g=gap/2,q=strength*1e5;
+    return[{x:cx,y:cy-g,q:flipped?-q:q},{x:cx,y:cy+g,q:flipped?q:-q}];
   }
 
   function drawUMagnet(){
-    const cx=W()/2, cy=H()/2, g=gap/2;
-    const pw=50, ph=gap+40;
-    const armH=40;
-    // left arm (actually top and bottom poles)
-    const topY=cy-g, botY=cy+g;
-    const Ncol=flipped?'#40c4ff':'#ff5252';
-    const Scol=flipped?'#ff5252':'#40c4ff';
-    // connecting piece
-    ctx.fillStyle='#444';
-    ctx.beginPath(); ctx.roundRect(cx-pw-30,topY-armH/2,30,ph,8); ctx.fill();
-    // top pole (N)
-    ctx.fillStyle=Ncol;
-    ctx.beginPath(); ctx.roundRect(cx-pw,topY-armH/2,pw*2,armH,8); ctx.fill();
-    ctx.fillStyle='#fff'; ctx.font='bold 16px system-ui';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(flipped?'S':'N',cx,topY);
-    // bottom pole (S)
-    ctx.fillStyle=Scol;
-    ctx.beginPath(); ctx.roundRect(cx-pw,botY-armH/2,pw*2,armH,8); ctx.fill();
-    ctx.fillStyle='#fff';
-    ctx.fillText(flipped?'N':'S',cx,botY);
+    const cx=W()/2,cy=H()/2,g=gap/2,pw=50,armH=40,ph=gap+40;
+    ctx.fillStyle='#3a3a4a';ctx.beginPath();ctx.roundRect(cx-pw-28,cy-g-armH/2,28,ph,6);ctx.fill();
+    ctx.fillStyle=flipped?'#40c4ff':'#ff5252';ctx.beginPath();ctx.roundRect(cx-pw,cy-g-armH/2,pw*2,armH,6);ctx.fill();
+    ctx.fillStyle=flipped?'#ff5252':'#40c4ff';ctx.beginPath();ctx.roundRect(cx-pw,cy+g-armH/2,pw*2,armH,6);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 15px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(flipped?'S':'N',cx,cy-g);ctx.fillText(flipped?'N':'S',cx,cy+g);
   }
 
-  function drawUniformLines(){
-    const cx=W()/2, cy=H()/2, g=gap/2;
-    const ps=getPoles();
-    const NLINES=9;
-    const x0=cx-60, x1=cx+60;
-    const dash=[8,6];
-    for(let i=0;i<NLINES;i++){
-      const y=cy-g*0.8+(i/(NLINES-1))*g*1.6;
-      const alpha=.6-Math.abs(y-cy)/(g)*.15;
-      // inside: straight parallel
-      ctx.strokeStyle=`rgba(255,210,60,${alpha})`;
-      ctx.lineWidth=1.3; ctx.setLineDash([10,7]);
-      ctx.lineDashOffset=-(animT*18)%17;
-      ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+  function drawUniLines(){
+    const cx=W()/2,cy=H()/2,g=gap/2,x0=cx-62,x1=cx+62;
+    ctx.lineWidth=1.3;
+    for(let i=0;i<9;i++){
+      const y=cy-g*.8+(i/8)*g*1.6,a=.58-Math.abs(y-cy)/g*.12;
+      ctx.strokeStyle=`rgba(255,210,60,${a})`;
+      ctx.setLineDash([10,7]);ctx.lineDashOffset=-(animT*18)%17;
+      ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();
       ctx.setLineDash([]);
-      // arrow
       const dir=flipped?-1:1;
-      const ax=cx+10*dir;
-      ctx.save(); ctx.translate(ax,y); ctx.rotate(dir>0?0:Math.PI);
-      ctx.strokeStyle=`rgba(255,210,60,${alpha*1.3})`; ctx.lineWidth=1.4;
-      ctx.beginPath(); ctx.moveTo(-5,-3); ctx.lineTo(0,0); ctx.lineTo(-5,3); ctx.stroke();
+      ctx.save();ctx.translate(cx+10*dir,y);ctx.rotate(dir>0?0:Math.PI);
+      ctx.strokeStyle=`rgba(255,210,60,${a*1.3})`;ctx.lineWidth=1.4;
+      ctx.beginPath();ctx.moveTo(-5,-3);ctx.lineTo(0,0);ctx.lineTo(-5,3);ctx.stroke();
       ctx.restore();
     }
-    // outside fringe lines (curved)
-    for(let k=-1;k<=1;k+=2){
-      ctx.save(); ctx.strokeStyle='rgba(255,210,60,.15)'; ctx.lineWidth=1; ctx.setLineDash([4,8]);
-      ctx.beginPath();
-      ctx.moveTo(x1,cy-g*.7);
-      ctx.bezierCurveTo(x1+80,cy,x1+80,cy,x1,cy+g*.7);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x0,cy-g*.7);
-      ctx.bezierCurveTo(x0-80,cy,x0-80,cy,x0,cy+g*.7);
-      ctx.stroke();
-      ctx.restore();
-    }
+    ctx.strokeStyle='rgba(255,210,60,.12)';ctx.lineWidth=1;ctx.setLineDash([4,8]);
+    ctx.beginPath();ctx.moveTo(x1,cy-gap/2*.7);ctx.bezierCurveTo(x1+78,cy,x1+78,cy,x1,cy+gap/2*.7);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x0,cy-gap/2*.7);ctx.bezierCurveTo(x0-78,cy,x0-78,cy,x0,cy+gap/2*.7);ctx.stroke();
+    ctx.setLineDash([]);
   }
 
-  function drawVecField(){
-    const step=48;
-    const ps=getPoles();
-    const cx=W()/2, cy=H()/2, g=gap/2;
+  function drawVF3(){
+    const ps=getPoles(),cx=W()/2,cy=H()/2,g=gap/2,step=50;
     for(let x=step*.5;x<W();x+=step){
       for(let y=step*.5;y<H();y+=step){
-        const dy1=y-(cy-g), dy2=y-(cy+g);
-        if(Math.abs(dy1)<30||Math.abs(dy2)<30) continue;
-        const {bx,by,mag}=fieldAt(x,y,ps);
-        if(mag<.5) continue;
-        const angle=Math.atan2(by,bx);
-        const alpha=Math.min(.65,mag*.0015+.07);
-        const len=Math.min(18,mag*.006+5);
-        ctx.save(); ctx.translate(x,y); ctx.rotate(angle);
-        ctx.strokeStyle=`rgba(0,230,118,${alpha})`; ctx.lineWidth=1.1;
-        ctx.beginPath(); ctx.moveTo(-len/2,0); ctx.lineTo(len/2,0); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(len*.4,-3); ctx.lineTo(len/2,0); ctx.lineTo(len*.4,3); ctx.stroke();
+        if(Math.abs(y-(cy-g))<30||Math.abs(y-(cy+g))<30)continue;
+        const{bx,by,mag}=fieldAt(x,y,ps);if(mag<.5)continue;
+        const a=Math.min(.6,mag*.0015+.07),len=Math.min(18,mag*.006+5);
+        ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(by,bx));
+        ctx.strokeStyle=`rgba(0,230,118,${a})`;ctx.lineWidth=1.1;
+        ctx.beginPath();ctx.moveTo(-len/2,0);ctx.lineTo(len/2,0);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(len*.4,-3);ctx.lineTo(len/2,0);ctx.lineTo(len*.4,3);ctx.stroke();
         ctx.restore();
       }
     }
   }
 
   function drawProbe(){
-    if(!show.probe) return;
-    const ps=getPoles();
-    const {bx,by,mag}=fieldAt(probeX,probeY,ps);
-    const angle=Math.atan2(by,bx)+Math.PI/2;
-    s0obj.needle(ctx,probeX,probeY,angle,18,.95);
-    ctx.beginPath(); ctx.arc(probeX,probeY,22,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,202,40,.35)'; ctx.lineWidth=1; ctx.stroke();
-    // readout above
+    if(!show.probe)return;
+    const ps=getPoles(),{bx,by,mag}=fieldAt(probeX,probeY,ps);
+    drawNeedle(ctx,probeX,probeY,Math.atan2(by,bx)+Math.PI/2,18,.95);
+    ctx.beginPath();ctx.arc(probeX,probeY,22,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,202,40,.3)';ctx.lineWidth=1;ctx.stroke();
     const bmT=(mag*1000).toFixed(2);
-    ctx.fillStyle='rgba(255,202,40,.8)'; ctx.font='11px monospace';
-    ctx.textAlign='center'; ctx.fillText(`|B|=${bmT} mT`,probeX,probeY-30);
-    document.getElementById('s3-pos').textContent=`B = ${bmT} mT`;
+    ctx.fillStyle='rgba(255,202,40,.8)';ctx.font='10px monospace';
+    ctx.textAlign='center';ctx.fillText(`|B|=${bmT}mT`,probeX,probeY-30);
+    document.getElementById('s3-pos').textContent=`B=${bmT} mT`;
     document.getElementById('s3-b').textContent=bmT;
-    // uniformity: compare to center
-    const {mag:magC}=fieldAt(W()/2,H()/2,ps);
-    const uni=magC>0?Math.round(Math.min(100,mag/magC*100)):100;
-    document.getElementById('s3-uni').textContent=uni;
+    const{mag:mC}=fieldAt(W()/2,H()/2,ps);
+    document.getElementById('s3-uni').textContent=mC>0?Math.round(Math.min(100,mag/mC*100)):100;
   }
 
   function render(){
+    if(!_visible){requestAnimationFrame(render);return;}
     requestAnimationFrame(render);
     animT+=.016;
-    const w=W(),h=H();
-    if(!probeX){probeX=w/2;probeY=h/2;}
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle='#060810'; ctx.fillRect(0,0,w,h);
-    // zone label
-    ctx.fillStyle='rgba(0,230,118,.07)';
-    ctx.beginPath(); ctx.roundRect(W()/2-70,H()/2-gap/2+20,140,gap-40,6); ctx.fill();
-    ctx.fillStyle='rgba(0,230,118,.15)'; ctx.font='11px system-ui';
-    ctx.textAlign='center'; ctx.fillText('Champ uniforme',W()/2,H()/2);
-    if(show.lines) drawUniformLines();
-    if(show.field) drawVecField();
-    drawUMagnet();
-    drawProbe();
+    const w=W(),h=H();if(!probeX){probeX=w/2;probeY=h/2;}
+    ctx.fillStyle='#060810';ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='rgba(0,230,118,.05)';
+    ctx.beginPath();ctx.roundRect(w/2-68,h/2-gap/2+20,136,gap-40,5);ctx.fill();
+    ctx.fillStyle='rgba(0,230,118,.13)';ctx.font='10px system-ui';ctx.textAlign='center';
+    ctx.fillText('Champ uniforme',w/2,h/2);
+    if(show.lines)drawUniLines();if(show.field)drawVF3();drawUMagnet();drawProbe();
   }
 
-  document.getElementById('wrap3').addEventListener('mousemove',e=>{
-    const r=document.getElementById('c3').getBoundingClientRect();
-    probeX=e.clientX-r.left; probeY=e.clientY-r.top;
-  });
+  document.getElementById('wrap3').addEventListener('mousemove',e=>{const r=document.getElementById('c3').getBoundingClientRect();probeX=e.clientX-r.left;probeY=e.clientY-r.top;});
+  document.getElementById('wrap3').addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0],r=document.getElementById('c3').getBoundingClientRect();probeX=t.clientX-r.left;probeY=t.clientY-r.top;},{passive:false});
   document.getElementById('s3-gap').oninput=function(){gap=parseInt(this.value);document.getElementById('s3-gap-v').textContent=this.value;};
   document.getElementById('s3-str').oninput=function(){strength=parseFloat(this.value);document.getElementById('s3-str-v').textContent=parseFloat(this.value).toFixed(1);};
-
-  render();
-  return {
+  requestAnimationFrame(render);
+  return{
     flip:()=>{flipped=!flipped;},
     toggle:(k,el)=>{show[k]=!show[k];el.classList.toggle('on',show[k]);}
   };
 })();
 
 // ================================================================
-//  TABS
+//  TABS + PANEL TOGGLE
 // ================================================================
 function showSim(n){
   document.querySelectorAll('.sim').forEach((s,i)=>s.classList.toggle('active',i===n));
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+}
+function togglePanel(id,btn){
+  const p=document.getElementById(id);
+  p.classList.toggle('collapsed');
+  btn.textContent=p.classList.contains('collapsed')?'⚙':'✕';
 }
 </script>
 </body>
