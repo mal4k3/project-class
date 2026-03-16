@@ -85,9 +85,122 @@ input[type=range]{flex:1;accent-color:var(--green);height:3px;cursor:pointer}
   .panel{max-height:50vh}
   .tab{padding:10px 8px;font-size:10px}
 }
+
+/* ===== HOME PAGE ===== */
+#home-page{
+  position:fixed;inset:0;z-index:200;
+  background:#0d1120;
+  display:flex;align-items:center;justify-content:center;
+}
+#home-bg{
+  position:absolute;inset:0;width:100%;height:100%;
+}
+#home-content{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;
+  padding:0 40px;
+  max-width:460px;width:100%;
+}
+#home-label{
+  font-size:10px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--green);margin-bottom:24px;
+}
+#home-title{
+  font-size:clamp(34px,5vw,54px);font-weight:900;
+  color:#fff;line-height:1.0;letter-spacing:-1.5px;
+  margin-bottom:8px;
+}
+#home-title span{color:var(--green)}
+#home-byline{
+  font-size:13px;color:var(--muted);
+  margin-bottom:48px;
+}
+.hitem{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 18px;
+  border-radius:11px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.03);
+  cursor:pointer;
+  transition:all .22s cubic-bezier(.4,0,.2,1);
+  margin-bottom:9px;
+  position:relative;
+  overflow:hidden;
+}
+.hitem::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;border-radius:3px 0 0 3px;
+  background:var(--green);opacity:0;
+  transition:opacity .22s;
+}
+.hitem:hover{
+  background:rgba(0,230,118,.06);
+  border-color:rgba(0,230,118,.25);
+  transform:translateX(5px);
+}
+.hitem:hover::before{opacity:1}
+.hitem:hover .hitem-name{color:var(--green)}
+.hitem:hover .hitem-arrow{opacity:1;transform:translateX(3px)}
+.hitem:hover .hitem-num{color:rgba(0,230,118,.6)}
+.hitem-num{
+  font-size:10px;font-family:monospace;
+  color:rgba(255,255,255,.18);min-width:18px;
+  transition:color .22s;
+}
+.hitem-name{
+  font-size:13px;font-weight:600;color:var(--text);
+  flex:1;transition:color .22s;letter-spacing:.2px;
+}
+.hitem-desc{
+  font-size:11px;color:rgba(255,255,255,.2);
+}
+.hitem-arrow{
+  color:var(--green);opacity:0;
+  transition:all .22s;font-size:12px;
+}
+#home-footer{
+  margin-top:44px;font-size:10px;letter-spacing:2px;
+  color:rgba(255,255,255,.12);text-transform:uppercase;
+}
+#home-page.hidden{
+  opacity:0;pointer-events:none;transition:opacity .35s;
+}
+body.home-active #tabs,
+body.home-active .sim{display:none!important}
+#back-btn{
+  display:none;position:fixed;top:11px;left:14px;z-index:100;
+  background:transparent;border:none;color:rgba(255,255,255,.3);
+  font-size:11px;letter-spacing:1px;cursor:pointer;
+  transition:color .18s;padding:4px 0;font-family:inherit;
+}
+#back-btn:hover{color:var(--green)}
+body:not(.home-active) #back-btn{display:block}
+@media(max-width:500px){
+  #home-content{padding:0 22px}
+  #home-title{font-size:clamp(28px,9vw,42px)}
+  .hitem-desc{display:none}
+}
+
 </style>
 </head>
 <body>
+
+<div id="home-page">
+  <canvas id="home-bg"></canvas>
+  <div id="home-content">
+    <div id="home-label">1ère Bac SM · Physique-Chimie</div>
+    <h1 id="home-title">Le Champ<br><span>Magnétique</span></h1>
+    <p id="home-byline">Doha &amp; Malak · Chapitre 3</p>
+    <div onclick="enterSim(0)" class="hitem"><span class="hitem-num">01</span><span class="hitem-name">Aimant &amp; Boussoles</span><span class="hitem-desc">Lignes de champ · Limaille</span><span class="hitem-arrow">→</span></div>
+    <div onclick="enterSim(1)" class="hitem"><span class="hitem-num">02</span><span class="hitem-name">Expérience d'Œrsted</span><span class="hitem-desc">Fil rectiligne · Champ circulaire</span><span class="hitem-arrow">→</span></div>
+    <div onclick="enterSim(2)" class="hitem"><span class="hitem-num">03</span><span class="hitem-name">Lignes de champ</span><span class="hitem-desc">Intégration Runge-Kutta 4</span><span class="hitem-arrow">→</span></div>
+    <div onclick="enterSim(3)" class="hitem"><span class="hitem-num">04</span><span class="hitem-name">Champ uniforme</span><span class="hitem-desc">Aimant en U · Sonde</span><span class="hitem-arrow">→</span></div>
+    <div onclick="enterSim(4)" class="hitem"><span class="hitem-num">05</span><span class="hitem-name">Topographie B</span><span class="hitem-desc">Fils · Spires · Superposition</span><span class="hitem-arrow">→</span></div>
+    <div id="home-footer">Simulations interactives · JavaScript / Canvas</div>
+  </div>
+</div>
+
+<button id="back-btn" onclick="goHome()">← Accueil</button>
 
 <!-- TABS -->
 <div id="tabs">
@@ -1460,6 +1573,163 @@ document.addEventListener("DOMContentLoaded", function(){
 })();
 
 });
+</script>
+<script>
+
+// HOME BACKGROUND — aimant barreau rouge/bleu, lignes de champ, Canvas2D
+(function(){
+  var cvs = document.getElementById('home-bg');
+  var ctx = cvs.getContext('2d');
+  var animT = 0;
+
+  function W(){ return cvs.offsetWidth; }
+  function H(){ return cvs.offsetHeight; }
+
+  function resize(){
+    cvs.width  = W() * devicePixelRatio;
+    cvs.height = H() * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  }
+  new ResizeObserver(resize).observe(cvs);
+  resize();
+
+  // dipole field
+  function dipole(px,py,sx,sy,q){
+    var dx=px-sx, dy=py-sy;
+    var r=Math.sqrt(dx*dx+dy*dy)+0.001;
+    return {bx:q*dx/(r*r*r), by:q*dy/(r*r*r)};
+  }
+  function field(px,py,nx,ny,sx,sy){
+    var a=dipole(px,py,nx,ny, 1.4e4);
+    var b=dipole(px,py,sx,sy,-1.4e4);
+    return {bx:a.bx+b.bx, by:a.by+b.by};
+  }
+
+  // trace one field line from (x0,y0)
+  function traceLine(x0,y0,nx,ny,sx,sy,steps){
+    var pts=[[x0,y0]], x=x0, y=y0, h=3;
+    for(var i=0;i<steps;i++){
+      var f=field(x,y,nx,ny,sx,sy);
+      var m=Math.sqrt(f.bx*f.bx+f.by*f.by)+0.0001;
+      x+=h*f.bx/m; y+=h*f.by/m;
+      pts.push([x,y]);
+      var w=W(),he=H();
+      if(x<-60||x>w+60||y<-60||y>he+60) break;
+      if(Math.hypot(x-sx,y-sy)<10) break;
+    }
+    return pts;
+  }
+
+  function render(){
+    requestAnimationFrame(render);
+    animT += 0.008;
+    var w=W(), h=H();
+    ctx.clearRect(0,0,w,h);
+
+    // background
+    ctx.fillStyle='#0d1120';
+    ctx.fillRect(0,0,w,h);
+
+    // magnet position — centered right side
+    var mx = w*0.62, my = h*0.5;
+    var hw = Math.min(w*0.09, 72);
+
+    var nx = mx - hw;
+    var sx = mx + hw;
+
+    var NLINES = 9;
+
+    // draw field lines from N pole
+    for(var i=0;i<NLINES;i++){
+      var angle = (i/(NLINES-1)) * Math.PI * 2;
+      var r0 = 16;
+      var x0 = nx + Math.cos(angle)*r0;
+      var y0 = my + Math.sin(angle)*r0;
+      var pts = traceLine(x0,y0,nx,my,sx,my,380);
+      if(pts.length < 3) continue;
+
+      // color: red near N, blue near S
+      var grad = ctx.createLinearGradient(nx,my,sx,my);
+      grad.addColorStop(0,   'rgba(255,82,82,0.55)');
+      grad.addColorStop(0.5, 'rgba(180,120,200,0.35)');
+      grad.addColorStop(1,   'rgba(64,196,255,0.55)');
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for(var k=1;k<pts.length;k++) ctx.lineTo(pts[k][0],pts[k][1]);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.1;
+      ctx.setLineDash([7,6]);
+      ctx.lineDashOffset = -(animT * 18) % 13;
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // arrow at midpoint
+      var mid = Math.floor(pts.length * 0.45);
+      if(mid > 1){
+        var dx = pts[mid][0]-pts[mid-1][0];
+        var dy = pts[mid][1]-pts[mid-1][1];
+        ctx.save();
+        ctx.translate(pts[mid][0], pts[mid][1]);
+        ctx.rotate(Math.atan2(dy,dx));
+        ctx.strokeStyle = 'rgba(180,180,220,0.5)';
+        ctx.lineWidth = 1.1;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(-5,-3); ctx.lineTo(0,0); ctx.lineTo(-5,3);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // N pole glow
+    var gnN = ctx.createRadialGradient(nx,my,0,nx,my,hw*0.9);
+    gnN.addColorStop(0,'rgba(255,82,82,0.28)');
+    gnN.addColorStop(1,'rgba(255,82,82,0)');
+    ctx.fillStyle=gnN;
+    ctx.beginPath(); ctx.arc(nx,my,hw*0.9,0,Math.PI*2); ctx.fill();
+
+    // S pole glow
+    var gnS = ctx.createRadialGradient(sx,my,0,sx,my,hw*0.9);
+    gnS.addColorStop(0,'rgba(64,196,255,0.28)');
+    gnS.addColorStop(1,'rgba(64,196,255,0)');
+    ctx.fillStyle=gnS;
+    ctx.beginPath(); ctx.arc(sx,my,hw*0.9,0,Math.PI*2); ctx.fill();
+
+    // magnet body — N half
+    ctx.fillStyle='#C0392B';
+    ctx.beginPath(); ctx.roundRect(mx-hw,my-16,hw,32,4); ctx.fill();
+    // magnet body — S half
+    ctx.fillStyle='#1565C0';
+    ctx.beginPath(); ctx.roundRect(mx,my-16,hw,32,4); ctx.fill();
+    // labels
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.font='bold 14px system-ui';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('N', mx-hw/2, my);
+    ctx.fillText('S', mx+hw/2, my);
+  }
+
+  render();
+})();
+
+function enterSim(n){
+  var hp=document.getElementById('home-page');
+  hp.classList.add('hidden');
+  document.body.classList.remove('home-active');
+  setTimeout(function(){hp.style.display='none';},350);
+  showSim(n);
+}
+function goHome(){
+  var hp=document.getElementById('home-page');
+  hp.style.display='flex';
+  document.body.classList.add('home-active');
+  setTimeout(function(){hp.classList.remove('hidden');},10);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.body.classList.add('home-active');
+});
+
 </script>
 </body>
 </html>
